@@ -1,0 +1,71 @@
+{
+  "name": "eslint-deep-dive",
+  "version": "1.0.0",
+  "description": "The purpose of this repository is to help you understand how ESLint works, how can you create rules, parser and configs based on TypeScript language.",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "npm run util:compile:tooling && npm run util:prepare:husky",
+    "pre-commit": "npx lint-staged",
+    "commit-msg": "npx commitlint -e $GIT_PARAMS",
+    "format:write": "prettier ./src --write",
+    "format:check": "prettier ./src --check",
+    "lint:fix": "eslint ./src --fix",
+    "lint:check": "eslint ./src",
+    "ci:build": "tsc --build",
+    "ast-demo:start": "run-p -l -r util:ast-demo:tsc-watch util:ast-demo:nodemon",
+    "util:ast-demo:tsc-watch": "tsc --watch --project ./src/ast-demo",
+    "util:ast-demo:nodemon": "nodemon ./dist/ast-demo ./dist/ast-demo/index",
+    "espree-demo:start": "run-p -l -r util:espree-demo:tsc-watch util:espree-demo:nodemon",
+    "util:espree-demo:tsc-watch": "tsc --watch --project ./src/espree-demo",
+    "util:espree-demo:nodemon": "nodemon ./dist/espree-demo ./dist/espree-demo/index",
+    "js-rule-demo:start": "run-p -l -r util:js-rule-demo:tsc-watch util:js-rule-demo:nodemon",
+    "js-rule-demo:test": "jest --projects ./src/js-rule-demo",
+    "js-rule-demo:test-watch": "jest --watch --projects ./src/js-rule-demo",
+    "util:js-rule-demo:tsc-watch": "tsc --watch --project ./src/js-rule-demo",
+    "util:js-rule-demo:nodemon": "nodemon ./dist/js-rule-demo ./dist/js-rule-demo/index",
+    "util:compile:tooling": "tsc --project ./tools/tsconfig.json",
+    "util:prepare:husky": "node ./tools/husky/prepare"
+  },
+  "author": "Mark Jehoda",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "~17.7.1",
+    "@commitlint/config-conventional": "~17.7.0",
+    "@types/eslint": "~8.44.2",
+    "@types/fs-extra": "~11.0.1",
+    "@types/node": "~18.17.6",
+    "@types/npmlog": "~4.1.4",
+    "@typescript-eslint/eslint-plugin": "~6.7.0",
+    "@typescript-eslint/parser": "~6.7.0",
+    "espree": "~9.6.1",
+    "fs-extra": "~11.1.1",
+    "husky": "~8.0.3",
+    "jest": "~29.6.4",
+    "lint-staged": "~14.0.1",
+    "nodemon": "~3.0.1",
+    "npm-run-all": "~4.1.5",
+    "npmlog": "~7.0.1",
+    "prettier": "~3.0.3",
+    "ts-jest": "~29.1.1",
+    "tslib": "~2.6.2",
+    "typescript": "~5.1.6"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "npm run format:write",
+      "npm run lint:fix"
+    ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "volta": {
+    "node": "18.17.1",
+    "npm": "9.6.7"
+  },
+  "dependencies": {
+    "eslint": "~8.47.0"
+  }
+}
