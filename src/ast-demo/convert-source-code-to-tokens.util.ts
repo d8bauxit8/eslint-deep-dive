@@ -26,7 +26,7 @@ const isKeyword = (line: string): readonly [TokenType, number] => {
 };
 
 const isPunctuator = (line: string): readonly [TokenType, number] => {
-  const regExp = /^\s*(?:[=!]==|[(){};=])/m;
+  const regExp = /^\s*(?:[=!]==|[=!]=|[(){};=])/m;
   const match = line.match(regExp);
   return ['Punctuator', match ? match[0].length : -1];
 };
