@@ -52,7 +52,7 @@ const mapMatcherToT = <T>([value]: Matcher<T>): T => value;
 
 const mapLiteralTokenToLiteral = (token: LiteralToken): Literal => ({
   type: 'Literal',
-  value: token.type === 'String' ? token.value : token.type === 'Number' ? parseInt(token.value) : token.value === 'true',
+  value: token.type === 'String' ? token.value.replace(/["']/g, '') : token.type === 'Number' ? parseInt(token.value) : token.value === 'true',
 });
 
 const mapConditionValue = (token: Token<'Identifier'> | LiteralToken): Literal | Identifier =>
