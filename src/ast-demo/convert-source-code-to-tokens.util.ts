@@ -63,7 +63,7 @@ const findToken = (line: string, previousTokenOfEndIndex: number): Token | undef
     const [type, lengthOfMatch] = matcher(line);
     if (lengthOfMatch !== -1) {
       const rawValue = line.substring(0, lengthOfMatch);
-      const value = type === 'String' ? rawValue.trimStart().replace(/["']/g, '') : rawValue.trimStart();
+      const value = rawValue.trimStart();
       const start = previousTokenOfEndIndex + (rawValue.length - value.length);
       const end = previousTokenOfEndIndex + lengthOfMatch;
       return { type, value, start, end };
@@ -100,7 +100,7 @@ export const convertSourceCodeToTokens = (sourceCode: string): readonly Token[] 
         end: token.end + previousProcessedLineEndOfIndex,
       }))
     );
-    previousProcessedLineEndOfIndex = previousProcessedLineEndOfIndex + line.length - 1;
+    previousProcessedLineEndOfIndex = previousProcessedLineEndOfIndex + line.length + 1;
   });
   return tokens;
 };
