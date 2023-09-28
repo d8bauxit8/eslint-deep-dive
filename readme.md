@@ -15,45 +15,51 @@ code more consistent and avoiding bugs.
     - 💻 [CLI](#-cli)
     - ⚙️ [CLI Engine](#-cli-engine)
     - 🎉 [Linter](#-linter)
-- 🔬 [How dose ESLint work in short](#-how-does-eslint-work-in-short)
-    - [AST](#ast)
+- 🔬 [How dose Linter work in short](#-how-does-linter-work-in-short)
+    - [Processors](#processors)
     - [Tokenization](#tokenization)
       - [What tokens are?](#what-are-tokens)
+    - [AST](#ast)
     - [ESPree](#espree)
 - 🧾 [Rules](#-rules)
   - ✍️ [Write custom rule](#-write-custom-rule)
   - 🥇 [Custom rule testing](#-custom-rule-testing)
+- 📌 Configs (In progress)
 - 📌 Parsers (In progress)
-
+  - 📌 Write custom parser (In progress)
+- 📌 TS-ESLint (In progress)
+  - 📌 Write and test TS-ESLint custom rule (In progress)
+- 📌 Create (TS-)ESLint plugin (In progress)
 
 ## 🧰 Parts of ESLint
 
 ```mermaid
 flowchart TD
     subgraph bin
-    A>eslint.js]
+        A>eslint.js]
     end
     A -.-> C & D
     subgraph lib
-    B>api.js] ---> E & F & G & I
-    C(cli.js) ---> E
-    G(linter) --> I & J
-    D(init) ---> E & J
-    F(rule-tester) --> G
-    E(cli-engine) --> G 
-    D ---> G
-    I(source-code)
-    J(rules)
+        B>api.js] ---> E & F & G & I
+        C(cli.js) ---> E
+        G(linter) --> I & J
+        F(rule-tester) --> G
+        E(cli-engine) --> G
+        I(source-code)
+        J(rules)
     end
+    D("Proxy call \nnpm init @eslint/config")
 ```
 
 - <b>[CLI](#-cli)</b> - This is the heart of the ESLint. It takes an array of arguments and then uses eslint to
   execute the commands.
 - <b>[CLI Engine](#-cli-engine)</b> - This module is `CLIEngine` class that finds source code files and configuration
-  files then does code verifying with the `Linter` class. This includes the loading logic of configuration files,
+  files then does code verifying with the `Linter` class. 
+  This includes the loading logic of configuration files,
   parsers, plugins, and formatters.
-- <b>[Linter](#-linter)</b> - This module is the core `Linter` class that does code verifying based on configuration
-  options.
+- <b>[Linter](#-linter)</b> - This module is the core `Linter` class that does code verifying based on configuration options. 
+  This file does not have I/O operation and does not interact with the console at all. 
+  For other Node.js programs that have JavaScript text to verify, they would be able to use this interface directly.
 - <b>[Rules](#-rules)</b> - This contains built-in rules.
 - <b>Rule tester</b> - This module is `RuleTester` class that is a wrapper around Mocha so that rules
   can be unit tested.
@@ -102,8 +108,8 @@ produced with both line/column and range locations which are useful for reportin
 source text related to an AST node, respectively.
 
 Once the AST is available, `estraverse` is used to traverse the AST from top to bottom. At each node, the `Linter`
-object emits an event that has the same name as the node type (i.e., “Identifier”, “WithStatement”, etc.). On the way
-back up the subtree, an event is emitted with the AST type name and suffixed with “:exit”, such as “Identifier:exit” -
+object emits an event that has the same name as the node type (i.e., `Identifier`, `WithStatement`, etc.). On the way
+back up the subtree, an event is emitted with the AST type name and suffixed with `:exit`, such as `Identifier:exit` -
 this allows rules to take action both on the way down and on the way up in the traversal. Each event is emitted with the
 appropriate AST node available.
 
@@ -114,20 +120,37 @@ This object’s responsibilities include:
 - Executing rules on the AST
 - Reporting back the results of the execution
 
-## 🔬 How does ESLint work in short?
+## 🔬 How does Linter work in short?
 
 ```mermaid
 flowchart LR
-    A([Source code]) --> B
-    B(ESPree) --> C
-    C(Linter) --> D
-    D([Done])
+    A([Source code]) --> ESPree 
+    A -.-> B
+    B(Preprocessor) -.-> ESPree
+    subgraph ESPree
+        direction LR
+        C(Tokenization) --> D
+        D(AST)
+    end
+    ESPree --> E
+    E(Linting) --> G
+    E -.-> F
+    F(Postprocessor) -.-> G
+    G([Results])
 ```
 
+### Processors
+
+Processors tell ESLint how to process files other than standard JavaScript.
+
 ### Tokenization
-Tokenization is a step during source code parsing.
+
+Tokenization (also known as lexical analysis) is a step during source code parsing.
+
+Side note: Before tokenization, line reconstruction is needed to convert the input character sequence to a canonical form ready for the tokenizer. Languages which (for example) allow arbitrary spaces within identifiers require this phase.
 
 #### What are tokens?
+
 Tokens represent those units from which the code is built, like Keyword (`const`), Identifier (`foo`, `bar`), Punctuator (`=`, `{`, `}`).
 These tokens help us to get some information about source or make changes and help parser to produce the AST object.
 <br />I have created a simple tokenizer which you can find [src/ast-demo/convert-source-code-to-tokens.util.ts](src/ast-demo/convert-source-code-to-tokens.util.ts) in this repository.
@@ -148,9 +171,9 @@ flowchart TD
     A --> B
     A --> C
     subgraph Body
-    B(Variable declaration)
-    C(Function declaration) --> D
-    D(Return statement)
+        B(Variable declaration)
+        C(Function declaration) --> D
+        D(Return statement)
     end
 ```
 
@@ -167,8 +190,7 @@ In short the steps are the following
 flowchart LR
     A([Source code]) -- Tokenization --> B
     B(Tokens) --> C
-    C(AST Object) --> D
-    D([Source code])
+    C(AST Object)
 ```
 
 You can find [src/espree-demo/index.ts](src/espree-demo/index.ts) in this repository.
@@ -184,9 +206,11 @@ if it does not meet that expectation. Rules can also contain additional configur
 ESLint provides us with many built-in rules that you can use, on the other hand you have opportunity to write custom rules to which fit your idea.
 
 ### ✍️ Write custom rule
+
 I have produced a demo example which you can find in the [src/js-rule-demo/prefer-strict-equal.rule.ts](src/js-rule-demo/prefer-strict-equal.rule.ts) and [src/js-rule-demo/index.ts](src/js-rule-demo/index.ts) files.
 Run `npm run js-rule-demo:start` to see what happens.
 
 ### 🥇 Custom rule testing
+
 I have created a demo example which you can find in the [src/js-rule-demo/prefer-strict-equal.rule.spec.ts](src/js-rule-demo/prefer-strict-equal.rule.spec.ts) file.
 Run `npm run js-rule-demo:test-watch` to see what happens.
