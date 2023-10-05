@@ -7,7 +7,7 @@ export const RULE_NAME = 'prefer-strict-equal' as const;
 const NOT_ALLOWED_OPERATORS: readonly string[] = ['==', '!='];
 
 const operatorsFilter =
-  (allowedOperatorTypes: 'only-equals' | 'only-not-equals' | string) =>
+  (allowedOperatorTypes: unknown) =>
   (operator: (typeof NOT_ALLOWED_OPERATORS)[number]): boolean => {
     if (allowedOperatorTypes == 'only-equals') {
       return operator === '==';
@@ -49,7 +49,7 @@ export default {
   // The create method responsible for the rule's logic.
   create(context: Rule.RuleContext): Rule.RuleListener {
     // Get the options from the context to use it later
-    const allowedOperatorTypes: 'only-equals' | 'only-not-equals' | string = context.options[0] || '';
+    const allowedOperatorTypes: unknown = (context.options[0] as unknown) || '';
 
     return {
       // Let's filter the node. The keys can be a node type (AST type), selector or event name.
