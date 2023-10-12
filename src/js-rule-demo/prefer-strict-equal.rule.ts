@@ -20,9 +20,14 @@ const operatorsFilter =
     return true;
   };
 
-// This object responsible for Rule's configurations and meta information
+// This object responsible for rule's configurations and meta information
 const meta: Rule.RuleMetaData = {
+  // Indicates the type of rule, which is one of "problem", "suggestion", or "layout":
+  //    - problem: The rule is identifying code that either will cause an error or may cause a confusing behavior. Developers should consider this a high priority to resolve.
+  //    - suggestion: The rule is identifying something that could be done in a better way but no errors will occur if the code isn’t changed.
+  //    - layout: The rule cares primarily about whitespace, semicolons, commas, and parentheses, all the parts of the program that determine how the code looks rather than how it executes. These rules work on parts of the code that aren’t specified in the AST.
   type: 'suggestion',
+  // Required for core rules and optional for custom rules
   docs: {
     description: 'Prefer `===` condition instead of `==`',
     recommended: false,
@@ -31,10 +36,10 @@ const meta: Rule.RuleMetaData = {
   fixable: 'code',
   messages: {
     preferStrictEqual: 'Prefer `===` condition instead of `==`',
-    // It is needed for the fixer
+    // It is needed for the fixer to inform the user of what the fixer is doing
     suggestReplaceEqualOperator: "'Replace '{{actualOperator}}' to '{{expectedOperator}}'",
   },
-  // This schema responsible for the option parameters
+  // This schema responsible for the option parameters so ESLint can prevent invalid rule configurations.
   schema: [
     {
       enum: ['only-equals', 'only-not-equals'],
@@ -69,8 +74,8 @@ export default {
 
           // If we want to report an issue, call 'report' method with the necessary properties on the context instance.
           context.report({
-            node,
             loc: operatorToken.loc,
+            // Or node,
             messageId: 'preferStrictEqual',
             // If we want to fix this issue automatically, create a suggestion
             suggest: [
