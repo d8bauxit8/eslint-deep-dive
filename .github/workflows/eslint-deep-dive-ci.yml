@@ -19,7 +19,7 @@ jobs:
       - uses: volta-cli/action@v4
       - name: Install packages
         run: npm ci
-      - name: Run CI checks
+      - name: Run CI check
         run: npm run ci:check
       - name: Run tests
         run: npm run ci:test

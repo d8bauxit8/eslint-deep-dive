@@ -2,8 +2,9 @@
 
 The purpose of this repository is to help you understand how ESLint works, how can you create rules, parser and configs based on TypeScript language.
 
+![ESLint deep dive CI](https://github.com/d8bauxit8/eslint-deep-dive/actions/workflows/eslint-deep-dive-ci.yml/badge.svg?branch=main)
+
 Before anything to do, run `npm install`.
-![CI check](https://github.com/d8bauxit8/eslint-deep-dive/workflows/ESLint%20deep%20dive%20CI/badge.svg?branch=main)
 
 More about [ESLint](https://eslint.org/)
 
